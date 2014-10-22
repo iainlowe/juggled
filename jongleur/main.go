@@ -35,6 +35,8 @@ import (
 func main() {
 	var verbose, quiet bool
 	var httpPort, httpsPort string
+	var sslCert, sslKey string
+
 	var hostmapFile string
 	var outputVersion bool
 
@@ -46,6 +48,9 @@ func main() {
 
 	flag.StringVar(&httpPort, "http", ":80", "The address to listen on for HTTP connections")
 	flag.StringVar(&httpsPort, "https", ":443", "The address to listen on for HTTPS connections")
+
+	flag.StringVar(&sslCert, "sslCert", "c", "", "The certificate file to use for TLS/SSL")
+	flag.StringVar(&sslKey, "sslKey", "k", "", "The key file to use for TLS/SSL")
 
 	flag.Parse()
 
@@ -63,7 +68,7 @@ func main() {
 		log.Normal()
 	}
 
-	j := jongleur.NewJongleur("secure.crt", "secure.key")
+	j := jongleur.NewJongleur(sslCert, sslKey)
 
 	if hostmapFile != "" {
 		j.LoadHostmapFile(hostmapFile)

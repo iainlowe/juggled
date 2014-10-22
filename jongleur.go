@@ -9,13 +9,16 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"os"
 	"strings"
 
 	"github.com/ilowe/log"
 )
 
+// BUG(ilowe): you are expected to actually want TLS/SSL support so the cases where you don't use it are poorly handled
+
 // Current library version
-var Version = "0.0.1"
+var Version = "0.0.2"
 
 // container struct for loading hosts from .json files
 type Hosts struct {
@@ -123,8 +126,15 @@ func (j Jongleur) Juggle(httpAddr, httpsAddr string) {
 	log.Infof("Starting HTTP/S endpoints on ports %s and %s...\n", httpAddr, httpsAddr)
 	http.HandleFunc("/", j.handleHTTPRequests)
 
-	go http.ListenAndServe(httpAddr, nil)
-	http.ListenAndServeTLS(httpsAddr, j.SSLCert, j.SSLKey, nil)
+	switch {
+	case j.SSLCert != "" && j.SSLKey != "":
+		go http.ListenAndServeTLS(httpsAddr, j.SSLCert, j.SSLKey, nil)
+	case j.SSLCert != "" || j.SSLKey != "":
+		log.Errorln("you must specify both a key and certificate in order to enable TLS/SSL")
+		os.Exit(-1)
+	}
+
+	http.ListenAndServe(httpAddr, nil)
 }
 
 func (j Jongleur) handleDockerEvents(events chan event) {
