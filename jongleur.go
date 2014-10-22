@@ -48,14 +48,14 @@ func newHost(HostID, IPAddress string, SSL bool, RequireAuth bool) *Host {
 }
 
 type Jongleur struct {
-	SSLCert string // Certificate file to use for TLS/SSL connections
-	SSLKey  string // Key file to use for TLS/SSL connections
+	sslCert string // Certificate file to use for TLS/SSL connections
+	sslKey  string // Key file to use for TLS/SSL connections
 
 	hosts map[string]*Host
 }
 
 func NewJongleur(cert, key string) *Jongleur {
-	return &Jongleur{SSLCert: cert, SSLKey: key, hosts: make(map[string]*Host)}
+	return &Jongleur{sslCert: cert, sslKey: key, hosts: make(map[string]*Host)}
 }
 
 // BUG(ilowe): LoadHostmapFile should really support using the container name for convenience
@@ -127,9 +127,9 @@ func (j Jongleur) Juggle(httpAddr, httpsAddr string) {
 	http.HandleFunc("/", j.handleHTTPRequests)
 
 	switch {
-	case j.SSLCert != "" && j.SSLKey != "":
-		go http.ListenAndServeTLS(httpsAddr, j.SSLCert, j.SSLKey, nil)
-	case j.SSLCert != "" || j.SSLKey != "":
+	case j.sslCert != "" && j.sslKey != "":
+		go http.ListenAndServeTLS(httpsAddr, j.sslCert, j.sslKey, nil)
+	case j.sslCert != "" || j.sslKey != "":
 		log.Errorln("you must specify both a key and certificate in order to enable TLS/SSL")
 		os.Exit(-1)
 	}
