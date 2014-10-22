@@ -17,15 +17,15 @@ import (
 
 // BUG(ilowe): you are expected to actually want TLS/SSL support so the cases where you don't use it are poorly handled
 
-// Current library version
+// The current library version.
 var Version = "0.0.2"
 
-// container struct for loading hosts from .json files
+// The Hosts type is used for loading hosts from .json files.
 type Hosts struct {
 	Hosts []Host `json:"hosts",omitempty`
 }
 
-// mapped host for docker container
+// The Host type is a mapped/exposed docker container.
 type Host struct {
 	HostID      string `json:"id"`
 	IPAddress   string `json:"ip"`
@@ -47,7 +47,7 @@ func newHost(HostID, IPAddress string, SSL bool, RequireAuth bool) *Host {
 	}
 }
 
-// use NewJongleur to get instances of this type
+// The Jongleur type should not be used directly; instead, use NewJongleur to get instances of this type.
 type Jongleur struct {
 	sslCert string // Certificate file to use for TLS/SSL connections
 	sslKey  string // Key file to use for TLS/SSL connections
@@ -55,14 +55,14 @@ type Jongleur struct {
 	hosts map[string]*Host
 }
 
-// creator function for Jongleur instances
+// NewJongleur creates and initializes a new instance of the Jongleur type.
 func NewJongleur(cert, key string) *Jongleur {
 	return &Jongleur{sslCert: cert, sslKey: key, hosts: make(map[string]*Host)}
 }
 
 // BUG(ilowe): LoadHostmapFile should really support using the container name for convenience
 
-// Loads host mappings from a JSON file
+// LoadHostmapFile loads host mappings from a .json file.
 func (j Jongleur) LoadHostmapFile(hostmapFile string) {
 	if jsonSrc, err := ioutil.ReadFile(hostmapFile); err == nil {
 		var hosts = &Hosts{}
@@ -84,20 +84,21 @@ func handler(proxy *httputil.ReverseProxy) func(http.ResponseWriter, *http.Reque
 	}
 }
 
-// Removes the host mapping for the supplied hostID.
-// If the hostID is not found in the current host map, the call is ignored.
+// Unregister removes the host mapping for the supplied hostID.
+// If the hostID is not found in the current host map, the call is ignored
+// (ie. it is safe to call this function with host IDs that don't exist).
 func (j Jongleur) Unregister(hostID string) {
 	log.Debugln("unregistering", hostID)
 	delete(j.hosts, hostID)
 }
 
-// Registers a new host mapping for the supplied container
+// Register creates a new container mapping.
 func (j Jongleur) Register(hostID, ipAddress string, requireSSL bool, requireAuth bool) {
 	j.hosts[hostID] = newHost(hostID, ipAddress, requireSSL, requireAuth)
 	log.Infof("registered new host %s at IP %s (SSL: %v, BasicAuth: %v)\n", hostID, ipAddress, requireSSL, requireAuth)
 }
 
-// Convenience function for registering existing host structs.
+// RegisterHost is a convenience function for registering existing instances of the Host type.
 func (j Jongleur) RegisterHost(h Host) {
 	j.Register(h.HostID, h.IPAddress, h.SSL, h.RequireAuth)
 }
@@ -119,9 +120,8 @@ func (j Jongleur) handleHTTPRequests(rw http.ResponseWriter, req *http.Request) 
 	}
 }
 
-// Main entry point for juggling requests to docker containers
-//
-// Calling this will start watching docker and will start serving HTTP/S requests.
+// Juggle is the main entry point for juggling requests to docker containers.
+// Calling this will start watching docker and serving HTTP/S requests.
 func (j Jongleur) Juggle(httpAddr, httpsAddr string) {
 	go j.watchDocker()
 
