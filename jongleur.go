@@ -21,7 +21,7 @@ import (
 var Version = "0.0.2"
 
 type hosts struct {
-	hosts []Host `json:"hosts",omitempty`
+	hosts []Host `json:"hosts"`
 }
 
 // The Host type is a mapped/exposed docker container.
