@@ -18,7 +18,20 @@
 			]
 		}
 
-	NOTE: You need to use the ID of the container because it's a pain to search by name :)
+	Usage
+
+	You can obtain "online" help by running "jongleur -h"; here is the output for convenience:
+
+		Usage of jongleur:
+		  -H, --hostmap="": (optional) a file containing host mappings
+		  -w, --http=":80": The address to listen on for HTTP connections
+		  -s, --https=":443": The address to listen on for HTTPS connections
+		  -q, --quiet=false: be quiet
+		  -c, --sslCert="": The certificate file to use for TLS/SSL
+		  -k, --sslKey="": The key file to use for TLS/SSL
+		  -v, --verbose=false: be verbose
+		  -V, --version=false: output version and exit
+
 */
 package main
 
@@ -46,8 +59,8 @@ func main() {
 
 	flag.StringVarP(&hostmapFile, "hostmap", "H", "", "(optional) a file containing host mappings")
 
-	flag.StringVarP(&httpPort, "http", "w", ":80", "The address to listen on for HTTP connections")
-	flag.StringVarP(&httpsPort, "https", "s", ":443", "The address to listen on for HTTPS connections")
+	flag.StringVar(&httpPort, "http", "w", ":80", "The address to listen on for HTTP connections")
+	flag.StringVar(&httpsPort, "https", "s", ":443", "The address to listen on for HTTPS connections")
 
 	flag.StringVarP(&sslCert, "sslCert", "c", "", "The certificate file to use for TLS/SSL")
 	flag.StringVarP(&sslKey, "sslKey", "k", "", "The key file to use for TLS/SSL")
