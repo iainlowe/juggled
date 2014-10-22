@@ -11,7 +11,6 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/ilowe/jongleur"
 	"github.com/ilowe/log"
 )
 
@@ -61,13 +60,11 @@ func NewJongleur(cert, key string) *Jongleur {
 // Loads host mappings from a JSON file
 func (j Jongleur) LoadHostmapFile(hostmapFile string) {
 	if jsonSrc, err := ioutil.ReadFile(hostmapFile); err == nil {
-		var hosts = &jongleur.Hosts{}
+		var hosts = &Hosts{}
 		json.Unmarshal(jsonSrc, &hosts)
 
 		for i := range hosts.Hosts {
-			h := hosts.Hosts[i]
-			log.Infoln(h)
-			j.RegisterHost(&h)
+			j.RegisterHost(hosts.Hosts[i])
 		}
 	} else {
 		log.Errorln(err)
@@ -96,9 +93,7 @@ func (j Jongleur) Register(hostID, ipAddress string, requireSSL bool, requireAut
 }
 
 // Convenience function for registering existing host structs.
-//
-// WARNING: This function will create a NEW host for each struct passed to it.
-func (j Jongleur) RegisterHost(h *Host) {
+func (j Jongleur) RegisterHost(h Host) {
 	j.Register(h.HostID, h.IPAddress, h.SSL, h.RequireAuth)
 }
 
