@@ -2,6 +2,7 @@
 package jongleur
 
 import (
+	"crypto/tls"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -60,6 +61,7 @@ func NewJongleur(cert, key string) *Jongleur {
 }
 
 // BUG(ilowe): LoadHostmapFile should really support using the container name for convenience
+// BUG(ilowe): loaded hosts need to be mapped to a name
 
 // LoadHostmapFile loads host mappings from a .json file.
 func (j Jongleur) LoadHostmapFile(hostmapFile string) {
@@ -125,17 +127,33 @@ func (j Jongleur) Juggle(httpAddr, httpsAddr string) {
 	go j.watchDocker()
 
 	log.Infof("Starting HTTP/S endpoints on ports %s and %s...\n", httpAddr, httpsAddr)
+
 	http.HandleFunc("/", j.handleHTTPRequests)
+
+	sslServer := http.Server{
+		Addr:      httpsAddr,
+		TLSConfig: &tls.Config{MinVersion: tls.VersionTLS10},
+	}
+
+	httpServer := http.Server{Addr: httpAddr}
 
 	switch {
 	case j.sslCert != "" && j.sslKey != "":
-		go http.ListenAndServeTLS(httpsAddr, j.sslCert, j.sslKey, nil)
+		go func() {
+			if err := sslServer.ListenAndServeTLS(j.sslCert, j.sslKey); err != nil {
+				log.Errorln("failed to start TLS/SSL:", err)
+				os.Exit(-2)
+			}
+		}()
 	case j.sslCert != "" || j.sslKey != "":
 		log.Errorln("you must specify both a key and certificate in order to enable TLS/SSL")
 		os.Exit(-1)
 	}
 
-	http.ListenAndServe(httpAddr, nil)
+	if err := httpServer.ListenAndServe(); err != nil {
+		log.Errorln("failed to start HTTP server:", err)
+		os.Exit(-3)
+	}
 }
 
 func (j Jongleur) handleDockerEvents(events chan event) {
