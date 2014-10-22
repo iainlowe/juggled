@@ -11,13 +11,13 @@ import (
 import "encoding/json"
 
 type event struct {
-	Id        string `json:"id"`
+	ID        string `json:"id"`
 	Status    string `json:"status"`
 	container *container
 }
 
 type container struct {
-	Id              string
+	ID              string
 	Image           string
 	Config          *config
 	NetworkSettings *networkSettings
@@ -66,7 +66,7 @@ func watchDocker(events chan event) {
 			}
 			log.Errorln(err)
 		}
-		if container := inspectContainer(evt.Id, c); container != nil {
+		if container := inspectContainer(evt.ID, c); container != nil {
 			evt.container = container
 			events <- evt
 		}
