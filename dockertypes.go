@@ -29,7 +29,7 @@ type config struct {
 }
 
 type networkSettings struct {
-	IpAddress   string
+	IPAddress   string
 	PortMapping map[string]map[string]string
 }
 
@@ -38,7 +38,7 @@ func (c container) HostID() string {
 }
 
 func (c container) IP() string {
-	return c.NetworkSettings.IpAddress
+	return c.NetworkSettings.IPAddress
 }
 
 func watchDocker(events chan event) {
