@@ -47,6 +47,7 @@ func newHost(HostID, IPAddress string, SSL bool, RequireAuth bool) *Host {
 	}
 }
 
+// use NewJongleur to get instances of this type
 type Jongleur struct {
 	sslCert string // Certificate file to use for TLS/SSL connections
 	sslKey  string // Key file to use for TLS/SSL connections
@@ -54,6 +55,7 @@ type Jongleur struct {
 	hosts map[string]*Host
 }
 
+// creator function for Jongleur instances
 func NewJongleur(cert, key string) *Jongleur {
 	return &Jongleur{sslCert: cert, sslKey: key, hosts: make(map[string]*Host)}
 }
