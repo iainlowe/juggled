@@ -3,12 +3,15 @@ package jongleur
 
 import (
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"strings"
 
+	"github.com/ilowe/jongleur"
 	"github.com/ilowe/log"
 )
 
@@ -51,6 +54,24 @@ type Jongleur struct {
 
 func NewJongleur(cert, key string) *Jongleur {
 	return &Jongleur{SSLCert: cert, SSLKey: key, hosts: make(map[string]*Host)}
+}
+
+// BUG(ilowe): LoadHostmapFile should really support using the container name for convenience
+
+// Loads host mappings from a JSON file
+func (j Jongleur) LoadHostmapFile(hostmapFile string) {
+	if jsonSrc, err := ioutil.ReadFile(hostmapFile); err == nil {
+		var hosts = &jongleur.Hosts{}
+		json.Unmarshal(jsonSrc, &hosts)
+
+		for i := range hosts.Hosts {
+			h := hosts.Hosts[i]
+			log.Infoln(h)
+			j.RegisterHost(&h)
+		}
+	} else {
+		log.Errorln(err)
+	}
 }
 
 func handler(proxy *httputil.ReverseProxy) func(http.ResponseWriter, *http.Request) {
