@@ -1,37 +1,36 @@
 /*
-	The jongleur tool implements a basic command-line interface for the Jongleur library.
+The jongleur tool implements a basic command-line interface for the Jongleur library.
 
-	Hosts File
+Hosts File
 
-	You can provide a hosts file to force certain types of mappings pre-hoc by providing
-	a JSON file and using the --hostmap/-H flag when running jongleur from the command-line.
+You can provide a hosts file to force certain types of mappings pre-hoc by providing
+a JSON file and using the --hostmap/-H flag when running jongleur from the command-line.
 
-	The JSON should look like:
+The JSON should look like:
 
-		{
-			"hosts": [
-				{
-					"id": "68394fda8458",
-					"ssl": true,
-					"auth": false
-				}
-			]
-		}
+	{
+		"hosts": [
+			{
+				"id": "68394fda8458",
+				"ssl": true,
+				"auth": false
+			}
+		]
+	}
 
-	Usage
+Usage
 
-	You can obtain "online" help by running "jongleur -h"; here is the output for convenience:
+You can obtain "online" help by running "jongleur -h"; here is the output for convenience:
 
-		Usage of jongleur:
-		  -H, --hostmap="": (optional) a file containing host mappings
-		  -w, --http=":80": The address to listen on for HTTP connections
-		  -s, --https=":443": The address to listen on for HTTPS connections
-		  -q, --quiet=false: be quiet
-		  -c, --sslCert="": The certificate file to use for TLS/SSL
-		  -k, --sslKey="": The key file to use for TLS/SSL
-		  -v, --verbose=false: be verbose
-		  -V, --version=false: output version and exit
-
+	Usage of jongleur:
+	  -H, --hostmap="": (optional) a file containing host mappings
+	  -w, --http=":80": The address to listen on for HTTP connections
+	  -s, --https=":443": The address to listen on for HTTPS connections
+	  -q, --quiet=false: be quiet
+	  -c, --sslCert="": The certificate file to use for TLS/SSL
+	  -k, --sslKey="": The key file to use for TLS/SSL
+	  -v, --verbose=false: be verbose
+	  -V, --version=false: output version and exit
 */
 package main
 
