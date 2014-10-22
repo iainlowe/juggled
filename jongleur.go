@@ -20,9 +20,8 @@ import (
 // The current library version.
 var Version = "0.0.2"
 
-// The Hosts type is used for loading hosts from .json files.
-type Hosts struct {
-	Hosts []Host `json:"hosts",omitempty`
+type hosts struct {
+	hosts []Host `json:"hosts",omitempty`
 }
 
 // The Host type is a mapped/exposed docker container.
@@ -65,11 +64,11 @@ func NewJongleur(cert, key string) *Jongleur {
 // LoadHostmapFile loads host mappings from a .json file.
 func (j Jongleur) LoadHostmapFile(hostmapFile string) {
 	if jsonSrc, err := ioutil.ReadFile(hostmapFile); err == nil {
-		var hosts = &Hosts{}
-		json.Unmarshal(jsonSrc, &hosts)
+		var h = &hosts{}
+		json.Unmarshal(jsonSrc, &h)
 
-		for i := range hosts.Hosts {
-			j.RegisterHost(hosts.Hosts[i])
+		for i := range h.hosts {
+			j.RegisterHost(h.hosts[i])
 		}
 	} else {
 		log.Errorln(err)

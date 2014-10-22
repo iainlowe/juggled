@@ -46,11 +46,11 @@ func main() {
 
 	flag.StringVarP(&hostmapFile, "hostmap", "H", "", "(optional) a file containing host mappings")
 
-	flag.StringVar(&httpPort, "http", ":80", "The address to listen on for HTTP connections")
-	flag.StringVar(&httpsPort, "https", ":443", "The address to listen on for HTTPS connections")
+	flag.StringVarP(&httpPort, "http", "w", ":80", "The address to listen on for HTTP connections")
+	flag.StringVarP(&httpsPort, "https", "s", ":443", "The address to listen on for HTTPS connections")
 
-	flag.StringVar(&sslCert, "sslCert", "c", "", "The certificate file to use for TLS/SSL")
-	flag.StringVar(&sslKey, "sslKey", "k", "", "The key file to use for TLS/SSL")
+	flag.StringVarP(&sslCert, "sslCert", "c", "", "The certificate file to use for TLS/SSL")
+	flag.StringVarP(&sslKey, "sslKey", "k", "", "The key file to use for TLS/SSL")
 
 	flag.Parse()
 
