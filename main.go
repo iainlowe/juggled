@@ -1,10 +1,10 @@
 /*
-The jongleur tool implements a basic command-line interface for the Jongleur library.
+The juggled daemon maps docker containers to HTTP hostnames.
 
 Hosts File
 
 You can provide a hosts file to force certain types of mappings pre-hoc by providing
-a JSON file and using the --hostmap/-H flag when running jongleur from the command-line.
+a JSON file and using the --hostmap/-H flag.
 
 The JSON should look like:
 
@@ -20,9 +20,9 @@ The JSON should look like:
 
 Usage
 
-You can obtain "online" help by running "jongleur -h"; here is the output for convenience:
+You can obtain "online" help by running "juggled -h"; here is the output for convenience:
 
-	Usage of jongleur:
+	Usage of juggled:
 	  -H, --hostmap="": (optional) a file containing host mappings
 	  -w, --http=":80": The address to listen on for HTTP connections
 	  -s, --https=":443": The address to listen on for HTTPS connections
@@ -40,7 +40,7 @@ import (
 
 	flag "github.com/ogier/pflag"
 
-	"github.com/ilowe/jongleur"
+	"github.com/ilowe/juggled/juggler"
 	"github.com/ilowe/log"
 )
 
@@ -67,7 +67,7 @@ func main() {
 	flag.Parse()
 
 	if outputVersion {
-		fmt.Println(jongleur.Version)
+		fmt.Println(juggler.Version)
 		os.Exit(0)
 	}
 
@@ -80,7 +80,7 @@ func main() {
 		log.Normal()
 	}
 
-	j := jongleur.NewJongleur(sslCert, sslKey)
+	j := juggler.NewJuggler(sslCert, sslKey)
 
 	if hostmapFile != "" {
 		j.LoadHostmapFile(hostmapFile)

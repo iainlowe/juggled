@@ -1,5 +1,5 @@
-// Package jongleur provides an HTTP/S juggler for connections to docker containers.
-package jongleur
+// Package juggler provides an HTTP/S virtual host mapper for connections to docker containers.
+package juggler
 
 import (
 	"crypto/tls"
@@ -47,24 +47,24 @@ func newHost(HostID, IPAddress string, SSL bool, RequireAuth bool) *Host {
 	}
 }
 
-// The Jongleur type should not be used directly; instead, use NewJongleur to get instances of this type.
-type Jongleur struct {
+// The Juggler type should not be used directly; instead, use NewJuggler to get instances of this type.
+type Juggler struct {
 	sslCert string // Certificate file to use for TLS/SSL connections
 	sslKey  string // Key file to use for TLS/SSL connections
 
 	hosts map[string]*Host
 }
 
-// NewJongleur creates and initializes a new instance of the Jongleur type.
-func NewJongleur(cert, key string) *Jongleur {
-	return &Jongleur{sslCert: cert, sslKey: key, hosts: make(map[string]*Host)}
+// NewJuggler creates and initializes a new instance of the Juggler type.
+func NewJuggler(cert, key string) *Juggler {
+	return &Juggler{sslCert: cert, sslKey: key, hosts: make(map[string]*Host)}
 }
 
 // BUG(ilowe): LoadHostmapFile should really support using the container name for convenience
 // BUG(ilowe): loaded hosts need to be mapped to a name
 
 // LoadHostmapFile loads host mappings from a .json file.
-func (j Jongleur) LoadHostmapFile(hostmapFile string) {
+func (j Juggler) LoadHostmapFile(hostmapFile string) {
 	if jsonSrc, err := ioutil.ReadFile(hostmapFile); err == nil {
 		var h = &hosts{}
 		json.Unmarshal(jsonSrc, &h)
@@ -80,7 +80,7 @@ func (j Jongleur) LoadHostmapFile(hostmapFile string) {
 func handler(proxy *httputil.ReverseProxy) func(http.ResponseWriter, *http.Request) {
 	return func(rw http.ResponseWriter, req *http.Request) {
 		log.Infoln(req.URL)
-		rw.Header().Set("X-Proxied-By", fmt.Sprintf("jongleur v%s", Version))
+		rw.Header().Set("X-Proxied-By", fmt.Sprintf("juggler v%s", Version))
 		proxy.ServeHTTP(rw, req)
 	}
 }
@@ -88,25 +88,25 @@ func handler(proxy *httputil.ReverseProxy) func(http.ResponseWriter, *http.Reque
 // Unregister removes the host mapping for the supplied hostID.
 // If the hostID is not found in the current host map, the call is ignored
 // (ie. it is safe to call this function with host IDs that don't exist).
-func (j Jongleur) Unregister(hostID string) {
+func (j Juggler) Unregister(hostID string) {
 	log.Debugln("unregistering", hostID)
 	delete(j.hosts, hostID)
 }
 
 // Register creates a new container mapping.
-func (j Jongleur) Register(hostID, ipAddress string, requireSSL bool, requireAuth bool) {
+func (j Juggler) Register(hostID, ipAddress string, requireSSL bool, requireAuth bool) {
 	j.hosts[hostID] = newHost(hostID, ipAddress, requireSSL, requireAuth)
 	log.Infof("registered new host %s at IP %s (SSL: %v, BasicAuth: %v)\n", hostID, ipAddress, requireSSL, requireAuth)
 }
 
 // RegisterHost is a convenience function for registering existing instances of the Host type.
-func (j Jongleur) RegisterHost(h Host) {
+func (j Juggler) RegisterHost(h Host) {
 	j.Register(h.HostID, h.IPAddress, h.SSL, h.RequireAuth)
 }
 
 /////////////////////////////////////////////
 
-func (j Jongleur) handleHTTPRequests(rw http.ResponseWriter, req *http.Request) {
+func (j Juggler) handleHTTPRequests(rw http.ResponseWriter, req *http.Request) {
 	requestedHostID := strings.Split(req.Host, ".")[0]
 
 	if host, ok := j.hosts[requestedHostID]; ok {
@@ -123,7 +123,7 @@ func (j Jongleur) handleHTTPRequests(rw http.ResponseWriter, req *http.Request) 
 
 // Juggle is the main entry point for juggling requests to docker containers.
 // Calling this will start watching docker and serving HTTP/S requests.
-func (j Jongleur) Juggle(httpAddr, httpsAddr string) {
+func (j Juggler) Juggle(httpAddr, httpsAddr string) {
 	go j.watchDocker()
 
 	log.Infof("Starting HTTP/S endpoints on ports %s and %s...\n", httpAddr, httpsAddr)
@@ -156,7 +156,7 @@ func (j Jongleur) Juggle(httpAddr, httpsAddr string) {
 	}
 }
 
-func (j Jongleur) handleDockerEvents(events chan event) {
+func (j Juggler) handleDockerEvents(events chan event) {
 	var evt event
 
 	for {
@@ -199,7 +199,7 @@ func (j Jongleur) handleDockerEvents(events chan event) {
 	}
 }
 
-func (j Jongleur) watchDocker() {
+func (j Juggler) watchDocker() {
 	var events = make(chan event)
 
 	go watchDocker(events)

@@ -1,4 +1,4 @@
-package jongleur
+package juggler
 
 import (
 	"io"
