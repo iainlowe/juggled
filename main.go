@@ -58,8 +58,8 @@ func main() {
 
 	flag.StringVarP(&hostmapFile, "hostmap", "H", "", "(optional) a file containing host mappings")
 
-	flag.StringVar(&httpPort, "http", "", "The address to listen on for HTTP connections")
-	flag.StringVar(&httpsPort, "https", "", "The address to listen on for HTTPS connections")
+	flag.StringVar(&httpPort, "http", ":http", "The address to listen on for HTTP connections")
+	flag.StringVar(&httpsPort, "https", ":https", "The address to listen on for HTTPS connections")
 
 	flag.StringVarP(&sslCert, "sslCert", "c", "", "The certificate file to use for TLS/SSL")
 	flag.StringVarP(&sslKey, "sslKey", "k", "", "The key file to use for TLS/SSL")
@@ -86,7 +86,7 @@ func main() {
 		j.LoadHostmapFile(hostmapFile)
 	}
 
-	if httpPort == "" || httpsPort == "" && os.Geteuid() != 0 {
+	if (httpPort == ":http" || httpsPort == ":https") && os.Geteuid() != 0 {
 		log.Errorln("Non-root user cannot use ports under 1024!")
 		os.Exit(-1)
 	}
