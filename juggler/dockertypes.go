@@ -18,6 +18,7 @@ type event struct {
 
 type container struct {
 	ID              string
+	Name            string
 	Image           string
 	Config          *config
 	NetworkSettings *networkSettings

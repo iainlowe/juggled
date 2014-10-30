@@ -49,6 +49,7 @@ func newHost(HostID, IPAddress string, SSL bool, RequireAuth bool) *Host {
 
 // The Juggler type should not be used directly; instead, use NewJuggler to get instances of this type.
 type Juggler struct {
+	mapAll  bool   // Map all seen nodes
 	sslCert string // Certificate file to use for TLS/SSL connections
 	sslKey  string // Key file to use for TLS/SSL connections
 
@@ -57,7 +58,7 @@ type Juggler struct {
 
 // NewJuggler creates and initializes a new instance of the Juggler type.
 func NewJuggler(cert, key string) *Juggler {
-	return &Juggler{sslCert: cert, sslKey: key, hosts: make(map[string]*Host)}
+	return &Juggler{mapAll: true, sslCert: cert, sslKey: key, hosts: make(map[string]*Host)}
 }
 
 // BUG(ilowe): LoadHostmapFile should really support using the container name for convenience
@@ -94,14 +95,18 @@ func (j Juggler) Unregister(hostID string) {
 }
 
 // Register creates a new container mapping.
-func (j Juggler) Register(hostID, ipAddress string, requireSSL bool, requireAuth bool) {
-	j.hosts[hostID] = newHost(hostID, ipAddress, requireSSL, requireAuth)
-	log.Infof("registered new host %s at IP %s (SSL: %v, BasicAuth: %v)\n", hostID, ipAddress, requireSSL, requireAuth)
+func (j Juggler) Register(hostID, ipAddress string, requireSSL bool, requireAuth bool, names ...string) {
+	host := newHost(hostID, ipAddress, requireSSL, requireAuth)
+	for _, name := range names {
+		j.hosts[name] = host
+	}
+	j.hosts[hostID] = host
+	log.Infof("registered new host %s at IP %s (SSL: %v, BasicAuth: %v, Names: %v)\n", hostID, ipAddress, requireSSL, requireAuth, names)
 }
 
 // RegisterHost is a convenience function for registering existing instances of the Host type.
-func (j Juggler) RegisterHost(h Host) {
-	j.Register(h.HostID, h.IPAddress, h.SSL, h.RequireAuth)
+func (j Juggler) RegisterHost(h Host, names ...string) {
+	j.Register(h.HostID, h.IPAddress, h.SSL, h.RequireAuth, names...)
 }
 
 /////////////////////////////////////////////
@@ -184,8 +189,18 @@ func (j Juggler) handleDockerEvents(events chan event) {
 				}
 			}
 
-			if !skip {
-				j.Register(c.HostID(), c.IP(), ssl, auth)
+			if (c.IP() != "" && j.mapAll) || !skip {
+				names := []string{}
+				names = append(names, c.Name[1:])
+
+				iname := c.ID[:12]
+				hname := c.Config.Hostname
+
+				if iname != hname {
+					names = append(names, hname)
+				}
+
+				j.Register(iname, c.IP(), ssl, auth, names...)
 			} else if h, ok := j.hosts[c.HostID()]; ok {
 				h.IPAddress = c.HostID()
 				h.SSL = ssl

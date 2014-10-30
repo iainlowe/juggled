@@ -52,6 +52,8 @@ func main() {
 	var hostmapFile string
 	var outputVersion bool
 
+	var unprivileged bool
+
 	flag.BoolVarP(&verbose, "verbose", "v", false, "be verbose")
 	flag.BoolVarP(&quiet, "quiet", "q", false, "be quiet")
 	flag.BoolVarP(&outputVersion, "version", "V", false, "output version and exit")
@@ -63,6 +65,8 @@ func main() {
 
 	flag.StringVarP(&sslCert, "sslCert", "c", "", "The certificate file to use for TLS/SSL")
 	flag.StringVarP(&sslKey, "sslKey", "k", "", "The key file to use for TLS/SSL")
+
+	flag.BoolVarP(&unprivileged, "unprivileged", "U", false, "Run unprivileged (shortcut for mangling --http and --https)")
 
 	flag.Parse()
 
@@ -84,6 +88,11 @@ func main() {
 
 	if hostmapFile != "" {
 		j.LoadHostmapFile(hostmapFile)
+	}
+
+	if unprivileged {
+		httpPort = ":8080"
+		httpsPort = ":8181"
 	}
 
 	if (httpPort == ":http" || httpsPort == ":https") && os.Geteuid() != 0 {
