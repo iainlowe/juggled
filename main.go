@@ -53,6 +53,9 @@ an HTTP GETtable resource. This resource should be a JSON file containing the fo
 		}
 	}
 
+By default, the realm called "default" will be used. If you wish, you may specify which realm from the
+file to use by setting the JUGGLED_AUTHFILE_REALM environment variable on launched containers.
+
 Note that containers that specify a JUGGLED_AUTHFILE_URL may NOT be included in the list of insecure
 containers: all authentication must take place over an HTTPS connection.
 */
