@@ -32,11 +32,11 @@ For example, given "-H bob:sam:jim,sally:lucy:emma,abc:def:ghj" and "--insecure 
 HTTP access (via any of the mapped components) to either container will succeed. Access to the "bob:jim:sam"
 container will continue to redirect to the HTTPS port.
 
-Non-standard ports
+Non-standard addresses
 
-You can configure Juggled to use non-standard ports by setting the environment variables JUGGLED_HTTP
-and JUGGLED_HTTPS to customize the ports used for HTTP and HTTPS respectively. You need to prefix the port
-with ":".
+You can configure Juggled to use non-standard addresses by setting the environment variables JUGGLED_HTTP
+and JUGGLED_HTTPS to customize the addresses used for HTTP and HTTPS respectively. This allows you to bind
+juggled to a specific IP, or just to customize the port it listens on for a certain type of request.
 
 As a shortcut, you can use the --unprivileged/-U flag to use ports 8080 (HTTP) and 8181 (HTTPS) for
 testing/development using a non-root account.
@@ -47,27 +47,14 @@ You can enable basic auth for your container by setting the environment variable
 an HTTP GETtable resource. This resource should be a JSON file containing the following structure:
 
 	{
-		"realm": "My secret realm",
-		"users": {
+		"My secret realm": {
 			"bob": "<sha512 hash>",
 			"sally": "<sha512 hash>"
 		}
 	}
 
-Note that containers that specify a JUGGLED_AUTHFILE_URL may not be included in the list of insecure
+Note that containers that specify a JUGGLED_AUTHFILE_URL may NOT be included in the list of insecure
 containers: all authentication must take place over an HTTPS connection.
-
-Usage
-
-You can obtain "online" help by running "juggled -h"; here is the output for convenience:
-
-	Usage of juggled:
-	  -H, --hostmap="": (optional) hostmap to use (comma-separated in the form "<cmp>(:<cmp>)+")
-	  -q, --quiet=false: be quiet
-	  -c, --sslCert="": The certificate file to use for TLS/SSL
-	  -k, --sslKey="": The key file to use for TLS/SSL
-	  -v, --verbose=false: be verbose
-	  -V, --version=false: output version and exit
 */
 package main
 
@@ -114,7 +101,7 @@ func main() {
 	flag.BoolVarP(&quiet, "quiet", "q", false, "be quiet")
 	flag.BoolVarP(&outputVersion, "version", "V", false, "output version and exit")
 
-	flag.StringVarP(&hostmapFile, "hostmap", "H", "", "(optional) a file containing host mappings")
+	flag.StringVarP(&hostmapFile, "hostmap", "H", "", "Pre-hoc host mappings")
 
 	flag.StringVarP(&sslCert, "sslCert", "c", "", "The certificate file to use for TLS/SSL")
 	flag.StringVarP(&sslKey, "sslKey", "k", "", "The key file to use for TLS/SSL")
